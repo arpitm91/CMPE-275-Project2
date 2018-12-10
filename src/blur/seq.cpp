@@ -1,4 +1,9 @@
+//
+// Created by Aartee Kasliwal on 2018-12-09.
+//
+
 #include <cstdio>
+#include <iostream>
 #include <cv.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -20,6 +25,7 @@ IplImage* blur_sequential(IplImage* image, double r);
 
 int main(int argc, const char** argv){
     const char *originalImagePath = argv[1];
+//    Mat originalImage = cvLoadImage(originalImagePath, CV_LOAD_IMAGE_COLOR);
     IplImage* originalImage = cvLoadImage(originalImagePath, CV_LOAD_IMAGE_COLOR);
 
     //check whether the image is loaded or not
@@ -30,13 +36,13 @@ int main(int argc, const char** argv){
 
     // getting blurred image
     IplImage* blurred_image;
-//    auto dt_s = high_resolution_clock::now();
+    auto dt_s = high_resolution_clock::now();
 
     blurred_image = blur_sequential(originalImage, GAUSSIAN_RADIUS);
 
-    //Time spent in blur_sequential
-//    auto dt = duration_cast<nanoseconds> (high_resolution_clock::now() - dt_s);
-//    std::cout << "\ndt seq = " << dt.count() << " ns" << "\n";
+    // Time spent in blur_sequential
+    auto dt = duration_cast<seconds> (high_resolution_clock::now() - dt_s);
+    std::cout << "\ndt seq = " << dt.count() << " sec" << "\n";
 
     //showing original and blurred_image in one window
 
@@ -63,8 +69,8 @@ IplImage* blur_sequential(IplImage* image, double r) {
     IplImage* result = cvCloneImage(image);
     int h = image->height;
     int w = image->width;
-    printf("h=%d, w=%d", h, w);
     double rs = ceil(r * 2.57);     // significant radius
+
     for(int i = 0; i < h; i++) {
         for (int j = 0; j < w; j++) {
             Weights weights;

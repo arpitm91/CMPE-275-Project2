@@ -8,3 +8,4 @@ compile:
 
 clean:
 	cd build && make clean
+	rm -rf build

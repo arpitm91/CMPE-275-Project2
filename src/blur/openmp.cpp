@@ -1,4 +1,9 @@
+//
+// Created by Aartee Kasliwal on 2018-12-09.
+//
+
 #include <cstdio>
+#include <iostream>
 #include <cv.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -30,7 +35,13 @@ int main(int argc, const char** argv){
 
     // getting blurred image
     IplImage* blurred_image;
+    auto dt_s = high_resolution_clock::now();
+
     blurred_image = blur_openmp(originalImage, GAUSSIAN_RADIUS);
+
+    // Time spent in blur_openmp
+    auto dt = duration_cast<seconds> (high_resolution_clock::now() - dt_s);
+    std::cout << "\ndt seq = " << dt.count() << " sec" << "\n";
 
     //showing original and blurred_image in one window
 
@@ -59,7 +70,7 @@ IplImage* blur_openmp(IplImage* image, double r) {
     int w = image->width;
 
     double rs = ceil(r * 2.57);     // significant radius
-#pragma omp parallel for schedule(guided)
+    #pragma omp parallel for schedule(guided)
     for(int i=0; i<h; i++) {
         for (int j = 0; j < w; j++) {
             Weights weights;

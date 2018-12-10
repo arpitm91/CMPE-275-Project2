@@ -13,8 +13,9 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost COMPONENTS chrono)
 
 # openmp flags
-SET(OPENMP_CXX_FLAGS "-O3 -fopenmp")
-SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${OPENMP_CXX_FLAGS}" )
+#set(OPENMP_CXX_FLAGS "-O3 -fopenmp")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${OPENMP_CXX_FLAGS}")
 
 find_package( OpenCV REQUIRED )
 
@@ -36,3 +37,6 @@ target_link_libraries(blur-seq ${OpenCV_LIBS} ${Boost_LIBRARIES})
 
 add_executable(blur-omp ../src/blur/openmp.cpp)
 target_link_libraries(blur-omp ${OpenCV_LIBS} ${Boost_LIBRARIES})
+
+add_executable(blur ../src/blur/blur.cpp)
+target_link_libraries(blur ${OpenCV_LIBS} ${Boost_LIBRARIES})
