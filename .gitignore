@@ -6,4 +6,4 @@
 *.fatbin
 .idea/*
 bin/*
-build/*z
+build/*
