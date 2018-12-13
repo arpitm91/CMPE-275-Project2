@@ -79,10 +79,7 @@ int main(int argc, char **argv) {
     std::cout << "\ndt seq = " << dt.count() << " ms" << "\n";
 
     Mat concatenated_image(original_image.cols * 2, original_image.rows, CV_8UC3, Scalar(255, 255, 255));
-//    namedWindow("Display window", WINDOW_AUTOSIZE);
     hconcat(original_image, contrast_image, concatenated_image);
     imwrite("./output/contrast-omp.jpg", concatenated_image);
-//    imshow("Display window", concatenated_image);
-//    waitKey(0);
     return 0;
 }
