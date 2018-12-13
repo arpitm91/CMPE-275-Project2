@@ -13,7 +13,9 @@
 #include <iostream>
 #include <string>
 #include <unistd.h>
+#include <boost/chrono.hpp>
 
+using namespace boost::chrono;
 using namespace cv;
 using namespace std;
 
@@ -48,6 +50,8 @@ int main(int argc, char **argv) {
 
     Mat contrast_image(original_image.rows, original_image.cols, CV_8UC3, Scalar(255, 255, 255));
 
+   auto dt_s = high_resolution_clock::now();    
+
     for (int i = 0; i < original_image.cols; i++) {
         for (int j = 0; j < original_image.rows; j++) {
             Vec3b color = original_image.at<Vec3b>(Point(i, j));
@@ -59,6 +63,11 @@ int main(int argc, char **argv) {
 
         }
     }
+
+    // Time spent in blur_sequential
+    auto dt = duration_cast<milliseconds> (high_resolution_clock::now() - dt_s);
+    std::cout << "\ndt seq = " << dt.count() << " ms" << "\n";
+
 
     Mat concatenated_image;
 	printf("Dimentions: %d x %d", contrast_image.rows, contrast_image.cols);
