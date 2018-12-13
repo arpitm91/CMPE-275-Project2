@@ -37,5 +37,5 @@ target_link_libraries(blur-seq ${OpenCV_LIBS} ${Boost_LIBRARIES})
 add_executable(blur-omp ../src/blur/openmp.cpp)
 target_link_libraries(blur-omp ${OpenCV_LIBS} ${Boost_LIBRARIES})
 
-add_executable(blur ../src/blur/blur.cpp)
-target_link_libraries(blur ${OpenCV_LIBS} ${Boost_LIBRARIES})
+# add_executable(blur ../src/blur/blur.cpp)
+# target_link_libraries(blur ${OpenCV_LIBS} ${Boost_LIBRARIES})
