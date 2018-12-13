@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
     cout << "Image Resolution: " << original_image.rows << "x" << original_image.cols << endl;
     float factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
 
-    Mat contrast_image(original_image.cols, original_image.rows, CV_8UC3, Scalar(255, 255, 255));
+    Mat contrast_image(original_image.rows, original_image.cols, CV_8UC3, Scalar(255, 255, 255));
 
     for (int i = 0; i < original_image.cols; i++) {
         for (int j = 0; j < original_image.rows; j++) {
@@ -61,9 +61,11 @@ int main(int argc, char **argv) {
     }
 
     Mat concatenated_image;
-    namedWindow("Display window", WINDOW_AUTOSIZE);
+	printf("Dimentions: %d x %d", contrast_image.rows, contrast_image.cols);
+//    namedWindow("Display window", WINDOW_AUTOSIZE);
     hconcat(original_image, contrast_image, concatenated_image);
-    imshow("Display window", concatenated_image);
-    waitKey(0);
+//    imshow("Display window", concatenated_image);
+//    waitKey(0);
+//    imwrite("./output/contrast_seq.jpg", concatenated_image);
     return 0;
 }

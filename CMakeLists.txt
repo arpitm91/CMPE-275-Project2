@@ -13,7 +13,7 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost COMPONENTS chrono)
 
 # openmp flags
-#set(OPENMP_CXX_FLAGS "-O3 -fopenmp")
+set(OPENMP_CXX_FLAGS "-O3 -fopenmp")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${OPENMP_CXX_FLAGS}")
 
