@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
         }
     }
   
-    std::cout << float( clock () - begin_time ) /  CLOCKS_PER_SEC;
+    std::cout << float( clock () - begin_time ) /  CLOCKS_PER_SEC << endl;
 
 
     imwrite("./output/contrast_seq.jpg", original_image);
