@@ -14,7 +14,8 @@
 using namespace cv;
 using namespace std;
 
-int Truncate(int value) {
+__device__
+int TruncateDevice(int value) {
 	if (value > 255)
 		return 255;
 	if (value < 0)
@@ -22,11 +23,20 @@ int Truncate(int value) {
     return value;
 }
 
+int Truncate(int value) {
+    if (value > 255)
+        return 255;
+    if (value < 0)
+        return 0;
+    return value;
+}
+
 uchar* convertImage(Mat mat) {
-        uchar *array = new uchar[mat.rows * mat.cols];
-            if (mat.isContinuous())
-                            array = mat.data;
-                return array;
+    // uchar *array = new uchar[mat.rows * mat.cols];
+    uchar *array;
+    if (mat.isContinuous())
+        array = mat.data;
+    return array;
 }
 
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
@@ -39,39 +49,21 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
 }
 
 __global__
-void add(uchar* image, int rows, int cols, int factor) {
-    int index = blockIdx.x * blockDim.x + threadIdx.x;
-    int stride = blockDim.x * gridDim.x;
-    
-//    for(int i = 0 ; i < 3; i++){
-//    int x = factor * ((int(image[index*blockDim.x+i])-128)+128);
-//    if (x > 255)
-//        x = 255;
-//    else if(x < 0)
-//        x = 0;                   
-//    image[index*blockDim.x+i] = x;    
-//    }
-    for (int i = index; i < rows; i+=stride){
-        for(int j = 0; j < 3*cols; j++) {
-            int x = factor * ((int(image[j*rows+i])-128)+128);
-            if (x > 255)
-                x = 255;
-           else if(x < 0)
-                x = 0;
-            image[j*rows+i] = x;
-         }
-    }
+void contrast_image(uchar* image, int rows, int cols, int factor) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int idy = blockIdx.y * blockDim.y + threadIdx.y;
+    long index = (idx + idy * cols) * 3;
+
+    image[index] = TruncateDevice( factor * ((int(image[index]) - 128) + 128) );
+    image[index+1] = TruncateDevice( factor * ((int(image[index+1]) - 128) + 128) );
+    image[index+2] = TruncateDevice( factor * ((int(image[index+2]) - 128) + 128) );
 }
 
 int main(int argc, char **argv) {
     int contrast = 127;
-    int threads = 1;
     if (argc < 2) {
         printf("Usage: ./executable filename [contrast]\n");
         return -1;
-    }
-    if (argc >= 3) {
-        threads = atoi(argv[2]);
     }
 
     string inputFile = argv[1];
@@ -83,11 +75,16 @@ int main(int argc, char **argv) {
     cout << "Image Resolution: " << original_image.rows << "x" << original_image.cols << endl;
     float factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
 
+    dim3 dimBlock(32,32);
+    dim3 dimGrid;
+    dimGrid.x = int(original_image.cols / 32);
+    dimGrid.y = int(original_image.rows / 32);
+
     const clock_t begin_time = clock();
 
     gpuErrchk(cudaMalloc((void**) &device_image, 3 *  original_image.rows * original_image.cols *sizeof(uchar))); 
     gpuErrchk(cudaMemcpy(device_image, image, 3 * original_image.rows * original_image.cols *sizeof(uchar), cudaMemcpyHostToDevice));
-    add<<<threads, threads>>>(device_image, original_image.rows, original_image.cols, factor);
+    contrast_image<<< dimGrid, dimBlock >>>(device_image, original_image.rows, original_image.cols, factor);
     gpuErrchk(cudaMemcpy(returned_image, device_image, 3 * original_image.rows * original_image.cols *sizeof(uchar), cudaMemcpyDeviceToHost));
     gpuErrchk(cudaFree(device_image));
 
