@@ -58,6 +58,9 @@ void contrast_image(uchar* image, int rows, int cols, int factor) {
     int idy = blockIdx.y * blockDim.y + threadIdx.y;
     long index = (idx + idy * cols) * 3;
 
+    if (idx >= cols || idy >= rows)
+        return;
+
     image[index] = TruncateDevice( factor * ((int(image[index]) - 128) + 128) );
     image[index+1] = TruncateDevice( factor * ((int(image[index+1]) - 128) + 128) );
     image[index+2] = TruncateDevice( factor * ((int(image[index+2]) - 128) + 128) );
@@ -89,8 +92,8 @@ int main(int argc, char **argv) {
 
         dim3 dimBlock(32,32);
         dim3 dimGrid;
-        dimGrid.x = ceil(original_image.cols / 32);
-        dimGrid.y = ceil(original_image.rows / 32);
+        dimGrid.x = ceil(float(original_image.cols) / 32);
+        dimGrid.y = ceil(float(original_image.rows) / 32);
 
         const clock_t begin_time = clock();
 
