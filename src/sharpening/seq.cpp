@@ -9,24 +9,41 @@
 using namespace cv;
 using namespace std;
 
-int SHARPEN_FACTOR[9] = {
-        -1, -1, -1,
-        -1, 9, -1,
-        -1, -1, -1
+int SHARPEN_FACTOR[3][3] = {
+        {-1, -1, -1},
+        {-1,  9,  -1},
+        {-1,  -1,  -1}
 };
 
-int my_sharpen(Vec3b color[], int index) {
-    int result = 0;
-
-    for (int i = 0; i < 9; i++) {
-        result += SHARPEN_FACTOR[i] * int(color[i][index]);
+void my_sharpen(Mat &original_image, int &i, int &j, int &newBlue, int &newGreen, int &newRed) {
+    newBlue = 0;
+    newGreen = 0;
+    newRed = 0;
+    Vec3b point_color;
+    int di, dj;
+    for (di = 0; di < 3; di++) {
+        for (dj = 0; dj < 3; dj++) {
+            point_color = original_image.at<Vec3b>(Point(i + di - 1, j + dj - 1));
+            newBlue += SHARPEN_FACTOR[dj][di] * point_color[0];
+            newGreen += SHARPEN_FACTOR[dj][di] * point_color[1];
+            newRed += SHARPEN_FACTOR[dj][di] * point_color[2];
+        }
     }
 
-    if (result < 0)
-        return  0;
-    if (result > 255)
-        return  255;
-    return result;
+    if (newBlue < 0)
+        newBlue = 0;
+    if (newBlue > 255)
+        newBlue = 255;
+
+    if (newGreen < 0)
+        newGreen = 0;
+    if (newGreen > 255)
+        newGreen = 255;
+
+    if (newRed < 0)
+        newRed = 0;
+    if (newRed > 255)
+        newRed = 255;
 }
 
 int main(int argc, char **argv) {
@@ -46,38 +63,24 @@ int main(int argc, char **argv) {
 
     namedWindow("Display window", WINDOW_NORMAL);// Create a window for display.
 
-    Vec3b color[9];
-    int i, j, newBlue, newGreen, newRed, n = original_image.cols, m = original_image.rows;
-    int factor = 2;
+    int i, j, n = original_image.cols, m = original_image.rows;
 
     Mat sharpened_image(m, n, CV_8UC3, Scalar(255, 255, 255));
     for (i = 0; i < n; i++) {
+        int newBlue, newGreen, newRed;
         for (j = 0; j < m; j++) {
-            if (i <= 0|| i >= n - 1 || j <= 0 || j >= m - 1) {
+            if (i <= 0 || i >= n - 1 || j <= 0 || j >= m - 1) {
                 sharpened_image.at<Vec3b>(Point(i, j)) = original_image.at<Vec3b>(Point(i, j));
                 continue;
             }
-            color[0] = original_image.at<Vec3b>(Point(i - 1, j - 1));
-            color[1] = original_image.at<Vec3b>(Point(i - 1, j));
-            color[2] = original_image.at<Vec3b>(Point(i - 1, j + 1));
-            color[3] = original_image.at<Vec3b>(Point(i, j - 1));
-            color[4] = original_image.at<Vec3b>(Point(i, j));
-            color[5] = original_image.at<Vec3b>(Point(i, j + 1));
-            color[6] = original_image.at<Vec3b>(Point(i + 1, j - 1));
-            color[7] = original_image.at<Vec3b>(Point(i + 1, j));
-            color[8] = original_image.at<Vec3b>(Point(i + 1, j + 1));
-            newBlue = my_sharpen(color, 0);
-            newGreen = my_sharpen(color, 1);
-            newRed = my_sharpen(color, 2);
-
-            sharpened_image.at<Vec3b>(Point(i, j)) = Vec3b(newBlue, newGreen, newRed);
+            my_sharpen(original_image, i, j, newBlue, newGreen, newRed);
+            sharpened_image.at<Vec3b>(Point(i, j)) = Vec3b(static_cast<uchar>(newBlue), static_cast<uchar>(newGreen),
+                                                           static_cast<uchar>(newRed));
 
         }
     }
 
     hconcat(original_image, sharpened_image, concatenated_image);
-    imshow("Display window", concatenated_image);                   // Show our image inside it.
-
-//    waitKey(0);                                          // Wait for a keystroke in the window
+    imwrite("pic.jpg", concatenated_image);                   // Show our image inside it.
     return 0;
 }

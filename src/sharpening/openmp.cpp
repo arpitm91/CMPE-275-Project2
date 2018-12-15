@@ -5,27 +5,31 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
+#include "omp.h"
 
 using namespace cv;
 using namespace std;
 
-int SHARPEN_FACTOR[9] = {
-        -1, -1, -1,
-        -1, 9, -1,
-        -1, -1, -1
+int SHARPEN_FACTOR[3][3] = {
+        {-1, -1, -1},
+        {-1, 8,  -1},
+        {-1, -1, -1}
 };
 
-int my_sharpen(Vec3b color[], int index) {
+int my_sharpen(Mat& original_image, int i, int j, int index) {
     int result = 0;
-
-    for (int i = 0; i < 9; i++) {
-        result += SHARPEN_FACTOR[i] * int(color[i][index]);
+    int di, dj;
+    for (di = 0; di < 3; di++) {
+        for (dj = 0; dj < 3; dj++) {
+            result += SHARPEN_FACTOR[dj][di] * original_image.at<Vec3b>(Point(i + di - 1, j + dj - 1))[index];
+        }
     }
 
     if (result < 0)
-        return  0;
+        return 0;
     if (result > 255)
-        return  255;
+        return 255;
+
     return result;
 }
 
@@ -46,38 +50,30 @@ int main(int argc, char **argv) {
 
     namedWindow("Display window", WINDOW_NORMAL);// Create a window for display.
 
-    Vec3b color[9];
-    int i, j, newBlue, newGreen, newRed, n = original_image.cols, m = original_image.rows;
-    int factor = 2;
+    int i, j, n = original_image.cols, m = original_image.rows;
 
     Mat sharpened_image(m, n, CV_8UC3, Scalar(255, 255, 255));
+
+    #pragma omp parallel for
     for (i = 0; i < n; i++) {
         for (j = 0; j < m; j++) {
-            if (i <= 0|| i >= n - 1 || j <= 0 || j >= m - 1) {
+            if (i <= 0 || i >= n - 1 || j <= 0 || j >= m - 1) {
                 sharpened_image.at<Vec3b>(Point(i, j)) = original_image.at<Vec3b>(Point(i, j));
                 continue;
             }
-            color[0] = original_image.at<Vec3b>(Point(i - 1, j - 1));
-            color[1] = original_image.at<Vec3b>(Point(i - 1, j));
-            color[2] = original_image.at<Vec3b>(Point(i - 1, j + 1));
-            color[3] = original_image.at<Vec3b>(Point(i, j - 1));
-            color[4] = original_image.at<Vec3b>(Point(i, j));
-            color[5] = original_image.at<Vec3b>(Point(i, j + 1));
-            color[6] = original_image.at<Vec3b>(Point(i + 1, j - 1));
-            color[7] = original_image.at<Vec3b>(Point(i + 1, j));
-            color[8] = original_image.at<Vec3b>(Point(i + 1, j + 1));
-            newBlue = my_sharpen(color, 0);
-            newGreen = my_sharpen(color, 1);
-            newRed = my_sharpen(color, 2);
 
-            sharpened_image.at<Vec3b>(Point(i, j)) = Vec3b(newBlue, newGreen, newRed);
+            int newBlue, newGreen, newRed;
+            newBlue = my_sharpen(original_image, i, j, 0);
+            newGreen = my_sharpen(original_image, i, j, 1);
+            newRed = my_sharpen(original_image, i, j, 2);
+            sharpened_image.at<Vec3b>(Point(i, j)) = Vec3b(static_cast<uchar>(newBlue), static_cast<uchar>(newGreen),
+                                                           static_cast<uchar>(newRed));
 
         }
     }
 
     hconcat(original_image, sharpened_image, concatenated_image);
-    imshow("Display window", concatenated_image);                   // Show our image inside it
-
-//    waitKey(0);                                          // Wait for a keystroke in the window
+    imshow("Display window", concatenated_image);                   // Show our image inside it.
+    waitKey(0);
     return 0;
 }
