@@ -116,7 +116,6 @@ int main(int argc, const char **argv) {
     uchar *host_image = convertImage(originalImage);
     uchar *device_image;
     uchar *output_image;
-    uchar *sharpened_image = (uchar *) malloc(3 * originalImage.rows * originalImage.cols * sizeof(uchar));
 
 
     gpuErrchk(cudaMalloc((void **) &device_image, 3 * originalImage.rows * originalImage.cols * sizeof(uchar)));
@@ -129,12 +128,12 @@ int main(int argc, const char **argv) {
 
     sharpen_image << < dimGrid, dimBlock >> > (device_image,output_image, originalImage.rows, originalImage.cols);
 
-    gpuErrchk(cudaMemcpy(sharpened_image, output_image, 3 * originalImage.rows * originalImage.cols * sizeof(uchar),
+    gpuErrchk(cudaMemcpy(host_image, output_image, 3 * originalImage.rows * originalImage.cols * sizeof(uchar),
                          cudaMemcpyDeviceToHost));
     gpuErrchk(cudaFree(device_image));
     gpuErrchk(cudaFree(output_image));
 
-    outputImage.data = sharpened_image;
+    outputImage.data = host_image;
     imwrite("output/sharpenedimage_cuda.png", outputImage);
     return 0;
 }
