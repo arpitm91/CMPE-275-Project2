@@ -132,6 +132,7 @@ int main(int argc, const char **argv) {
     gpuErrchk(cudaMemcpy(sharpened_image, output_image, 3 * originalImage.rows * originalImage.cols * sizeof(uchar),
                          cudaMemcpyDeviceToHost));
     gpuErrchk(cudaFree(device_image));
+    gpuErrchk(cudaFree(output_image));
 
     outputImage.data = sharpened_image;
     imwrite("output/sharpenedimage_cuda.png", outputImage);
