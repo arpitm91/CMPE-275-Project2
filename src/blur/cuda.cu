@@ -120,8 +120,10 @@ int main(int argc, const char** argv){
 	gpuErrchk(cudaMalloc((void**) &device_multiplication_matrix, size * sizeof(uint)));
 	gpuErrchk(cudaMemcpy(device_multiplication_matrix, multiplication_matrix, size * sizeof(uint), cudaMemcpyHostToDevice));
 
-	dim3 dimGrid(32, 32);
-	dim3 dimBlock(32, 32);
+	dim3 dimGrid;
+	dimGrid.x = ceil(float(originalImage.cols) / 32);
+	dimGrid.y = ceil(float(originalImage.rows) / 32);
+	dim3 dimBlock(32,32);
 
 	blur_image<<< dimGrid, dimBlock >>>(device_image, device_multiplication_matrix, originalImage.rows, originalImage.cols, GAUSSIAN_RADIUS);
 
