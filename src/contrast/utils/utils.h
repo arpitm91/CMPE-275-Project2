@@ -16,3 +16,11 @@ uchar* convertImage(Mat mat) {
         array = mat.data;
     return array;
 }
+
+int Truncate(int value) {
+	if (value > 255)
+		return 255;
+	if (value < 0)
+		return 0;
+    return value;
+}

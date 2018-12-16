@@ -13,6 +13,7 @@
 #include <libgen.h>
 #include <math.h>
 
+#include "./utils/utils.h"
 #include "./utils/openmp_contrast_ops.h"
 #include "./utils/seq_contrast_ops.h"
 
@@ -37,29 +38,29 @@ int main(int argc, char **argv) {
         string input_filename = basename(strdup(inputFile.c_str()));
         cout << "Processing Image: " << input_filename << endl;
         Mat original_image = imread(inputFile, CV_LOAD_IMAGE_COLOR);
+        Mat seq_image = original_image.clone();
 
         const clock_t begin_time = clock();
-        Mat contrast_image_cuda = contrast_cuda(original_image);            
+        Mat contrast_image_openmp = contrast_openmp(original_image, contrast);            
         const clock_t end_time = clock();
-        parallel_time += float( end_time - begin_time ) /  CLOCKS_PER_SEC 
-        // cout << "Cuda: "<< float( end_time - begin_time ) /  CLOCKS_PER_SEC << endl;
+        parallel_time += float( end_time - begin_time ) /  CLOCKS_PER_SEC;
+        cout << "OpenMP: "<< float( end_time - begin_time ) /  CLOCKS_PER_SEC << endl;
 
         const clock_t begin_time_seq = clock();
-        Mat contrast_image_seq = contrast_sequantial(original_image);        
+        Mat contrast_image_seq = contrast_sequantial(seq_image, contrast);        
         const clock_t end_time_seq = clock();
         sequence_time += float( end_time_seq - begin_time_seq ) /  CLOCKS_PER_SEC;
-        // cout << "Seq: "<< float( end_time_seq - begin_time_seq ) /  CLOCKS_PER_SEC << endl;
+        cout << "Seq   : "<< float( end_time_seq - begin_time_seq ) /  CLOCKS_PER_SEC << endl;
         
         string output_filename = "./output/contrast_seq_" + input_filename;
-        imwrite(output_filename, original_image);
+        imwrite(output_filename, contrast_image_seq);
 
-        original_image.data = image;
-        output_filename = "./output/contrast_cuda_" + input_filename;
-        imwrite(output_filename, original_image);
+        output_filename = "./output/contrast_openmp_" + input_filename;
+        imwrite(output_filename, contrast_image_openmp);
     }
 
     cout << "Total Sequenctial Time: " << sequence_time << endl;
-    cout << "Total Parallel    Time: " << parallel_time << endl;
+    cout << "Total OpenMP      Time: " << parallel_time << endl;
 
     return 0;
 }

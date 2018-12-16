@@ -5,15 +5,12 @@
 #include <iostream>
 #include <string>
 #include <unistd.h>
-#include "utils.h"
 
 using namespace cv;
 using namespace std;
 
-Mat contrast_sequantial(Mat original_image) { 
-    
-    Mat contrast_image(original_image.rows, original_image.cols, CV_8UC3, Scalar(255, 255, 255));    
-
+Mat contrast_openmp(Mat original_image, int contrast) { 
+    float factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
     #pragma omp parallel for
     for (int i = 0; i < original_image.cols; i++) {
         for (int j = 0; j < original_image.rows; j++) {
@@ -22,8 +19,8 @@ Mat contrast_sequantial(Mat original_image) {
             int newGreen = Truncate(factor * (int(color[1]) - 128) + 128);
             int newRed = Truncate(factor * (int(color[2]) - 128) + 128);
 
-            contrast_image.at<Vec3b>(Point(i, j)) = Vec3b(newBlue, newGreen, newRed);
+            original_image.at<Vec3b>(Point(i, j)) = Vec3b(newBlue, newGreen, newRed);
         }
     }
-    return contrast_image;
+    return original_image;
 }

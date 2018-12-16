@@ -19,11 +19,11 @@ set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${OPENMP_CXX_FLAGS}")
 find_package( OpenCV REQUIRED )
 
 # app targets
-add_executable(contrast-seq ../src/contrast/seq.cpp)
-target_link_libraries(contrast-seq ${OpenCV_LIBS} ${Boost_LIBRARIES})
+# add_executable(contrast-seq ../src/contrast/seq.cpp)
+# target_link_libraries(contrast-seq ${OpenCV_LIBS} ${Boost_LIBRARIES})
 
-add_executable(contrast-omp ../src/contrast/openmp.cpp)
-target_link_libraries(contrast-omp ${OpenCV_LIBS} ${Boost_LIBRARIES})
+# add_executable(contrast-omp ../src/contrast/openmp.cpp)
+# target_link_libraries(contrast-omp ${OpenCV_LIBS} ${Boost_LIBRARIES})
 
 add_executable(sharpen-seq ../src/sharpening/seq.cpp)
 target_link_libraries(sharpen-seq ${OpenCV_LIBS} ${Boost_LIBRARIES})
@@ -39,3 +39,6 @@ target_link_libraries(blur-omp ${OpenCV_LIBS} ${Boost_LIBRARIES})
 
 add_executable(openmp_performance_measure ../src/blur/openmp_performance_measure.cpp)
 target_link_libraries(openmp_performance_measure ${OpenCV_LIBS} ${Boost_LIBRARIES})
+
+add_executable(openmp_performance_measure-contrast ../src/contrast/openmp_performance_measure.cpp)
+target_link_libraries(openmp_performance_measure-contrast ${OpenCV_LIBS} ${Boost_LIBRARIES})

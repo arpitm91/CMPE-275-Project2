@@ -5,7 +5,6 @@
 #include <iostream>
 #include <string>
 #include <unistd.h>
-#include "utils.h"
 
 using namespace cv;
 using namespace std;
@@ -46,7 +45,7 @@ void contrast_image(uchar* image, int rows, int cols, int factor) {
 }
 
 
-Mat contrast_cuda(Mat original_image) { 
+Mat contrast_cuda(Mat original_image, int contrast) { 
 
     uchar* image = convertImage(original_image);
     uchar* device_image;
