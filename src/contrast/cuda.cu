@@ -74,7 +74,6 @@ int main(int argc, char **argv) {
     Mat original_image = imread(inputFile, CV_LOAD_IMAGE_COLOR);
     uchar* image = convertImage(original_image);
     uchar* device_image;
-    uchar* returned_image = (uchar *) malloc(3 * original_image.rows * original_image.cols *sizeof(uchar));
 
     cout << "Image Resolution: " << original_image.rows << "x" << original_image.cols << endl;
     float factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
@@ -89,7 +88,7 @@ int main(int argc, char **argv) {
     gpuErrchk(cudaMalloc((void**) &device_image, 3 *  original_image.rows * original_image.cols *sizeof(uchar))); 
     gpuErrchk(cudaMemcpy(device_image, image, 3 * original_image.rows * original_image.cols *sizeof(uchar), cudaMemcpyHostToDevice));
     contrast_image<<< dimGrid, dimBlock >>>(device_image, original_image.rows, original_image.cols, factor);
-    gpuErrchk(cudaMemcpy(returned_image, device_image, 3 * original_image.rows * original_image.cols *sizeof(uchar), cudaMemcpyDeviceToHost));
+    gpuErrchk(cudaMemcpy(image, device_image, 3 * original_image.rows * original_image.cols *sizeof(uchar), cudaMemcpyDeviceToHost));
     gpuErrchk(cudaFree(device_image));
 
     cout << "Par:" << float( clock () - begin_time ) /  CLOCKS_PER_SEC << endl;
@@ -102,7 +101,7 @@ int main(int argc, char **argv) {
     }
     cout << "Seq: "<< float( clock () - begin_time_seq ) /  CLOCKS_PER_SEC << endl;
 
-    original_image.data = returned_image;
+    original_image.data = image;
     imwrite("./output/contrast_cuda.jpg", original_image);
     return 0;
 }
