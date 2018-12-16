@@ -2,7 +2,7 @@
 // Created by Arpit Mathur on 2018-12-09.
 //
 
-#include<stdio.h>
+#include <stdio.h>
 #include <iostream>
 #include <string>
 #include <cv.h>
@@ -13,6 +13,12 @@
 
 using namespace cv;
 using namespace std;
+
+int kernel_cpu[9] = {
+        -1, -1, -1,
+        -1, 9, -1,
+        -1, -1, -1
+};
 
 uchar *convertImage(Mat mat) {
     uchar *array = new uchar[mat.rows * mat.cols];
@@ -31,19 +37,13 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort =
 }
 
 __global__
-void sharpen_image(uchar *device_image,uchar *output_image, int rows, int cols) {
+void sharpen_image(uchar *device_image, uchar *output_image, int *kernel, int rows, int cols) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int idy = blockIdx.y * blockDim.y + threadIdx.y;
 
     if (idx + 2 > cols - 1 || idy + 2 > rows - 1) {
         return;
     }
-
-    int multiplication_matrix[3][3] = {
-            {-1, -1, -1},
-            {-1, 9,  -1},
-            {-1, -1, -1},
-    };
 
 
     int red = 0;
@@ -62,9 +62,9 @@ void sharpen_image(uchar *device_image,uchar *output_image, int rows, int cols) 
 
             int index = 3 * ((idx + ix + 1) + (idy + iy + 1) * cols);
 
-            blue += device_image[index + 0] * multiplication_matrix[ix][iy];
-            green += device_image[index + 1] * multiplication_matrix[ix][iy];
-            red += device_image[index + 2] * multiplication_matrix[ix][iy];
+            blue += device_image[index + 0] * kernel[ix * 3 + iy];
+            green += device_image[index + 1] * kernel[ix * 3 + iy];
+            red += device_image[index + 2] * kernel[ix * 3 + iy];
         }
     }
 
@@ -116,22 +116,29 @@ int main(int argc, const char **argv) {
     uchar *host_image = convertImage(originalImage);
     uchar *device_image;
     uchar *output_image;
+    int *kernel;
 
 
     gpuErrchk(cudaMalloc((void **) &device_image, 3 * originalImage.rows * originalImage.cols * sizeof(uchar)));
     gpuErrchk(cudaMalloc((void **) &output_image, 3 * originalImage.rows * originalImage.cols * sizeof(uchar)));
+    gpuErrchk(cudaMalloc((void **) &kernel, 9 * sizeof(int)));
     gpuErrchk(cudaMemcpy(device_image, host_image, 3 * originalImage.rows * originalImage.cols * sizeof(uchar),
                          cudaMemcpyHostToDevice));
+    gpuErrchk(cudaMemcpy(kernel, kernel_cpu, 9 * sizeof(int), cudaMemcpyHostToDevice));
 
-    dim3 dimGrid(32, 32);
     dim3 dimBlock(32, 32);
+    dim3 dimGrid;
+    dimGrid.x = ceil(float(originalImage.cols) / 32);
+    dimGrid.y = ceil(float(originalImage.rows) / 32);
 
-    sharpen_image << < dimGrid, dimBlock >> > (device_image,output_image, originalImage.rows, originalImage.cols);
+    sharpen_image << < dimGrid, dimBlock >> >
+                                (device_image, output_image, kernel, originalImage.rows, originalImage.cols);
 
     gpuErrchk(cudaMemcpy(host_image, output_image, 3 * originalImage.rows * originalImage.cols * sizeof(uchar),
                          cudaMemcpyDeviceToHost));
     gpuErrchk(cudaFree(device_image));
     gpuErrchk(cudaFree(output_image));
+    gpuErrchk(cudaFree(kernel));
 
     outputImage.data = host_image;
     imwrite("output/sharpenedimage_cuda.png", outputImage);
