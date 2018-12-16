@@ -32,6 +32,14 @@ int main(int argc, char **argv) {
     double sequence_time = 0;
     double parallel_time = 0;
 
+    int numT = omp_get_num_threads();
+    int maxT = omp_get_max_threads();
+    int maxP = omp_get_num_procs();
+
+    printf("num threads: %d\n", numT);
+    printf("max threads: %d\n", maxT);
+    printf("num procs  : %d\n\n", maxP);
+
     for(int i = 0; i < images.size(); i++) {
 
         string inputFile = images[i];
