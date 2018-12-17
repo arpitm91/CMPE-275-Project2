@@ -1,3 +1,7 @@
+/*
+* Created by Aartee Kasliwal on 2018-12-09.
+*/
+
 #include <cuda_runtime.h>
 #include <stdio.h>
 #include <iostream>
@@ -90,7 +94,6 @@ double blur_image_cuda(string originalImagePath, bool isToImageWrite){
 		printf("Error : No Image Data.\n");
 		return -1;
 	}
-	//printf("Image resolution: %d * %d \n", originalImage.rows, originalImage.cols);
 
 	uchar* host_image = convertImage(originalImage);
 	uchar* device_image;
@@ -112,8 +115,10 @@ double blur_image_cuda(string originalImagePath, bool isToImageWrite){
 	gpuErrchk(cudaMalloc((void**) &device_multiplication_matrix, size * sizeof(uint)));
 	gpuErrchk(cudaMemcpy(device_multiplication_matrix, multiplication_matrix, size * sizeof(uint), cudaMemcpyHostToDevice));
 
-	dim3 dimGrid(32, 32);
-	dim3 dimBlock(32, 32);
+    dim3 dimBlock(32,32);
+    dim3 dimGrid;
+    dimGrid.x = ceil(float(original_image.cols) / 32);
+    dimGrid.y = ceil(float(original_image.rows) / 32);
 
 	blur_image<<< dimGrid, dimBlock >>>(device_image, device_multiplication_matrix, originalImage.rows, originalImage.cols, GAUSSIAN_RADIUS_CUDA);
 

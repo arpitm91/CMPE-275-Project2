@@ -1,3 +1,7 @@
+/*
+* Created by Aartee Kasliwal on 2018-12-09.
+*/
+
 #include <cuda_runtime.h>
 
 #ifndef CUDA_BLUR_OPS_H

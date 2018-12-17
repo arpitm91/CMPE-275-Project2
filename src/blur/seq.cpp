@@ -1,6 +1,6 @@
-//
-// Created by Arpit Mathur on 2018-12-09.
-//
+/*
+* Created by Aartee Kasliwal on 2018-12-09.
+*/
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -69,7 +69,6 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-//    namedWindow("Display window", WINDOW_NORMAL);// Create a window for display.
     struct timeval start, end;
     gettimeofday(&start, NULL);
 

@@ -2,10 +2,6 @@
 // Created by Anuj Chaudhari on 2018-12-08.
 //
 
-/*
- g++ seq.cpp -o seq_contrast `pkg-config --cflags --libs opencv`
- */
-
 #include <cv.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -14,10 +10,8 @@
 #include <string>
 #include <unistd.h>
 #include "omp.h"
-#include <boost/chrono.hpp>
 #include <sys/time.h>
 
-using namespace boost::chrono;
 using namespace cv;
 using namespace std;
 

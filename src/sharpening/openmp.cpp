@@ -70,7 +70,8 @@ int main(int argc, char **argv) {
     int i, j, n = original_image.cols, m = original_image.rows;
 
     Mat sharpened_image(m, n, CV_8UC3, Scalar(255, 255, 255));
-#pragma openmp parallel for
+
+    #pragma openmp parallel for
     for (i = 0; i < n; i++) {
         int newBlue, newGreen, newRed;
         for (j = 0; j < m; j++) {
@@ -79,7 +80,8 @@ int main(int argc, char **argv) {
                 continue;
             }
             my_sharpen(original_image, i, j, newBlue, newGreen, newRed);
-            sharpened_image.at<Vec3b>(Point(i, j)) = Vec3b(static_cast<uchar>(newBlue), static_cast<uchar>(newGreen),
+            sharpened_image.at<Vec3b>(Point(i, j)) = Vec3b(static_cast<uchar>(newBlue), 
+                                                          static_cast<uchar>(newGreen),
                                                            static_cast<uchar>(newRed));
 
         }

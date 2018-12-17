@@ -12,7 +12,7 @@ using namespace std;
 
 int SHARPEN_FACTOR[3][3] = {
         {-1, -1, -1},
-        {-1,  8,  -1},
+        {-1,  9,  -1},
         {-1,  -1,  -1}
 };
 
