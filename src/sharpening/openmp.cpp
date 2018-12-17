@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-    namedWindow("Display window", WINDOW_NORMAL);// Create a window for display.
+//    namedWindow("Display window", WINDOW_NORMAL);// Create a window for display.
 
     int i, j, n = original_image.cols, m = original_image.rows;
 
