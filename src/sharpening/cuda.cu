@@ -94,30 +94,24 @@ void sharpen_image(uchar *device_image, uchar *output_image, int *kernel, int ro
 }
 
 int main(int argc, const char **argv) {
-
-    if (argc < 2) {
-        printf("Usage: ./executable originalImagePath\n");
+    if (argc != 2) {
+        cout << " Usage: display_image ImageToLoadAndDisplay" << endl;
         return -1;
     }
-
-    //read the image
-    string originalImagePath = argv[1];
-    Mat originalImage = imread(originalImagePath, CV_LOAD_IMAGE_COLOR);
-    Mat outputImage = originalImage.clone();
+    Mat originalImage = imread(argv[1], CV_LOAD_IMAGE_COLOR);
 
     //check whether the image is loaded or not
     if (!originalImage.data) {
         printf("Error : No Image Data.\n");
         return -1;
     }
-    printf("Image resolution: %d * %d \n", originalImage.rows, originalImage.cols);
+    Mat outputImage = originalImage.clone();
 
-
+    const clock_t begin_time = clock();
     uchar *host_image = convertImage(originalImage);
     uchar *device_image;
     uchar *output_image;
     int *kernel;
-
 
     gpuErrchk(cudaMalloc((void **) &device_image, 3 * originalImage.rows * originalImage.cols * sizeof(uchar)));
     gpuErrchk(cudaMalloc((void **) &output_image, 3 * originalImage.rows * originalImage.cols * sizeof(uchar)));
@@ -141,6 +135,7 @@ int main(int argc, const char **argv) {
     gpuErrchk(cudaFree(kernel));
 
     outputImage.data = host_image;
-    imwrite("output/sharpenedimage_cuda.png", outputImage);
+//    imwrite("output/sharpenedimage_cuda.png", outputImage);
+
     return 0;
 }
