@@ -5,6 +5,8 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
+#include "omp.h"
+#include <sys/time.h>
 
 using namespace cv;
 using namespace std;
@@ -62,6 +64,8 @@ int main(int argc, char **argv) {
     }
 
 //    namedWindow("Display window", WINDOW_NORMAL);// Create a window for display.
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
 
     int i, j, n = original_image.cols, m = original_image.rows;
 
@@ -80,6 +84,11 @@ int main(int argc, char **argv) {
 
         }
     }
+    gettimeofday(&end, NULL);
+
+    float delta = ((end.tv_sec  - start.tv_sec) * 1000000u +
+                   end.tv_usec - start.tv_usec) / 1.e6;
+    cout<<delta;
 
 //    hconcat(original_image, sharpened_image, concatenated_image);
 //    imshow("Display window", sharpened_image);                   // Show our image inside it.

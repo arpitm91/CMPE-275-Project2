@@ -1,8 +1,19 @@
+count="0"
 for file in ./images/*
 do
-    utime="$( TIMEFORMAT='%lU';time ( ./bin/sharpen-omp  $file ) 2>&1 1>/dev/null )"
-    echo sharpen-omp, $file, $utime
+    FILESIZE=$(stat -f%z "$file")
+    echo -n $count, $file, $FILESIZE,
+    count=$((count+1))
 
-    utime="$( TIMEFORMAT='%lU';time ( ./bin/sharpen-seq  $file ) 2>&1 1>/dev/null )"
-    echo sharpen-seq, $file, $utime
+    ./bin/sharpen-omp  $file
+    echo -n ,
+
+    ./bin/sharpen-seq  $file
+    echo -n ,
+
+    ./bin/sharpen-cuda  $file
+    echo -n ,
+
+
+    echo ,
 done

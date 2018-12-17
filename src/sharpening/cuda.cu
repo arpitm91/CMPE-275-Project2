@@ -10,6 +10,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/gpu/gpu.hpp>
+#include <sys/time.h>
 
 using namespace cv;
 using namespace std;
@@ -100,6 +101,9 @@ int main(int argc, const char **argv) {
     }
     Mat originalImage = imread(argv[1], CV_LOAD_IMAGE_COLOR);
 
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
+
     //check whether the image is loaded or not
     if (!originalImage.data) {
         printf("Error : No Image Data.\n");
@@ -135,6 +139,11 @@ int main(int argc, const char **argv) {
     gpuErrchk(cudaFree(kernel));
 
     outputImage.data = host_image;
+    gettimeofday(&end, NULL);
+
+    float delta = ((end.tv_sec  - start.tv_sec) * 1000000u +
+                   end.tv_usec - start.tv_usec) / 1.e6;
+    cout<<delta;
 //    imwrite("output/sharpenedimage_cuda.png", outputImage);
 
     return 0;
