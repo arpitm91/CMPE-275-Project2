@@ -1,33 +1,45 @@
+#!/bin/bash 
+
 count="0"
-for file in ./images/*
-do
-    FILESIZE=$(stat -c%s "$file")
-    echo -n $count, $file, $FILESIZE,
-    count=$((count+1))
+COUNTER=0
 
-    ./bin/contrast-seq  $file
-    echo -n ,
+while [  $COUNTER -lt 3 ]; do
 
-    ./bin/contrast-omp  $file
-    echo -n ,
+    for file in ./images/*
+    do
+        FILESIZE=$(stat -c%s "$file")
+        echo -n $count, $file, $FILESIZE,
+        count=$((count+1))
 
-    ./bin/contrast-cuda  $file
-    echo -n ,
+        ./bin/contrast-seq  $file
+        echo -n ,
 
-    ./bin/sharpen-seq  $file
-    echo -n ,
+        ./bin/contrast-omp  $file
+        echo -n ,
 
-    ./bin/sharpen-omp  $file
-    echo -n ,
+        ./bin/contrast-cuda  $file
+        echo -n ,
 
-    ./bin/sharpen-cuda  $file
-    echo -n ,
+        ./bin/sharpen-seq  $file
+        echo -n ,
 
+        ./bin/sharpen-omp  $file
+        echo -n ,
 
-    ./bin/blur-seq  $file
-    #echo -n ,
+        ./bin/sharpen-cuda  $file
+        echo -n ,
 
-    #./bin/blur-seq ./images/lena_std.tif
-    echo -n ,
-    echo
-done
+        ./bin/blur-seq  $file
+        echo -n ,
+
+        ./bin/blur-omp $file
+        echo -n ,
+
+        ./bin/blur-cuda $file
+        echo -n ,
+
+        echo
+    done
+    COUNTER=$((COUNTER+1))
+done 
+

@@ -36,9 +36,3 @@ target_link_libraries(blur-seq ${OpenCV_LIBS} ${Boost_LIBRARIES})
 
 add_executable(blur-omp ../src/blur/openmp.cpp)
 target_link_libraries(blur-omp ${OpenCV_LIBS} ${Boost_LIBRARIES})
-
-add_executable(openmp_performance_measure ../src/blur/openmp_performance_measure.cpp)
-target_link_libraries(openmp_performance_measure ${OpenCV_LIBS} ${Boost_LIBRARIES})
-
-# add_executable(openmp_performance_measure-contrast ../src/contrast/openmp_performance_measure.cpp)
-# target_link_libraries(openmp_performance_measure-contrast ${OpenCV_LIBS} ${Boost_LIBRARIES})

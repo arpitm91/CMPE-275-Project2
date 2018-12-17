@@ -56,6 +56,7 @@ void my_blur(Mat &original_image, int &i, int &j, int &newBlue, int &newGreen, i
 }
 
 int main(int argc, char **argv) {
+
     if (argc != 2) {
         cout << " Usage: display_image ImageToLoadAndDisplay" << endl;
         return -1;

@@ -12,7 +12,7 @@
 using namespace cv;
 using namespace std;
 
-const int GAUSSIAN_RADIUS_CUDA = 11;
+const int GAUSSIAN_RADIUS_CUDA = 3;
 
 uchar* convertImage(Mat mat) {
 	uchar *array = new uchar[mat.rows * mat.cols];
