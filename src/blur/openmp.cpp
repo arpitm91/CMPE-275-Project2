@@ -2,7 +2,7 @@
 // Created by Aartee Kasliwal on 2018-12-09.
 //
 
-#include "seq_blur_ops.cpp"
+#include "seq_blur_ops.h"
 
 int main(int argc, const char** argv){
 
@@ -11,6 +11,6 @@ int main(int argc, const char** argv){
 		return -1;
 	}
 
-	printf("blur image sequential time = %f \n", blur_image(argv[1], "openmp", true));
+	printf("%f", blur_image(argv[1], "openmp", false));
 	return 0;
 }

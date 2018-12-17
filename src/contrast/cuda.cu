@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <ctime>
 #include <math.h>
+#include <sys/time.h>
 
 using namespace cv;
 using namespace std;
@@ -76,6 +77,9 @@ int main(int argc, char **argv) {
 
     float factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
 
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
+    
     dim3 dimBlock(32,32);
     dim3 dimGrid;
     dimGrid.x = ceil(float(original_image.cols) / 32);
@@ -86,8 +90,12 @@ int main(int argc, char **argv) {
     contrast_image<<< dimGrid, dimBlock >>>(device_image, original_image.rows, original_image.cols, factor);
     gpuErrchk(cudaMemcpy(image, device_image, 3 * original_image.rows * original_image.cols *sizeof(uchar), cudaMemcpyDeviceToHost));
     gpuErrchk(cudaFree(device_image));
-    original_image.data = image;
 
+    gettimeofday(&end, NULL);
+    float delta = ((end.tv_sec  - start.tv_sec) * 1000000u +
+                             end.tv_usec - start.tv_usec) / 1.e6;
+    cout << delta;
+    original_image.data = image;
     // imwrite("./output/contrast_cuda.jpg", original_image);
     return 0;
 }

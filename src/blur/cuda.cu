@@ -2,7 +2,7 @@
 * Created by Aartee Kasliwal on 2018-12-09.
 */
 
-#include "blur_ops.cu"
+#include "cuda_blur_ops.cu"
 
 int main(int argc, const char** argv){
 
@@ -11,6 +11,6 @@ int main(int argc, const char** argv){
 		return -1;
 	}
 
-	printf("cuda parallel time = %f \n", blur_image_cuda(argv[1], true));
+	printf("%f", blur_image_cuda(argv[1], false));
 	return 0;
 }

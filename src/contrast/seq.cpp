@@ -13,6 +13,7 @@
 #include <iostream>
 #include <string>
 #include <unistd.h>
+#include <sys/time.h>
 
 using namespace cv;
 using namespace std;
@@ -45,6 +46,9 @@ int main(int argc, char **argv) {
     }
     float factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
 
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
+
     for (int i = 0; i < original_image.cols; i++) {
         for (int j = 0; j < original_image.rows; j++) {
             Vec3b color = original_image.at<Vec3b>(Point(i, j));
@@ -57,6 +61,11 @@ int main(int argc, char **argv) {
         }
     }
 
+    gettimeofday(&end, NULL);
+
+    float delta = ((end.tv_sec  - start.tv_sec) * 1000000u + 
+                     end.tv_usec - start.tv_usec) / 1.e6;
+    cout << delta;
     // imwrite("./output/contrast-omp.jpg", concatenated_image);
     return 0;
 }

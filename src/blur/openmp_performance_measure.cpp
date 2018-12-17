@@ -12,7 +12,7 @@
 #include <ctime>
 #include <libgen.h>
 #include <math.h>
-#include "seq_blur_ops.cpp"
+#include "seq_blur_ops.h"
 
 #include "../lib/dirreader.h"
 

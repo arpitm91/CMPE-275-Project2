@@ -6,7 +6,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/gpu/gpu.hpp>
-
+#include <sys/time.h>
 #include "cuda_blur_ops.h"
 
 using namespace cv;
@@ -90,13 +90,14 @@ double blur_image_cuda(string originalImagePath, bool isToImageWrite){
 		printf("Error : No Image Data.\n");
 		return -1;
 	}
-	printf("Image resolution: %d * %d \n", originalImage.rows, originalImage.cols);
+	//printf("Image resolution: %d * %d \n", originalImage.rows, originalImage.cols);
 
 	uchar* host_image = convertImage(originalImage);
 	uchar* device_image;
 	uint* device_multiplication_matrix;
 
-	const clock_t begin_time = clock();
+	struct timeval start, end;
+    gettimeofday(&start, NULL);
 
 	gpuErrchk(cudaMalloc((void**) &device_image, 3 * originalImage.rows * originalImage.cols * sizeof(uchar)));
 	gpuErrchk(cudaMemcpy(device_image, host_image, 3 * originalImage.rows * originalImage.cols * sizeof(uchar), cudaMemcpyHostToDevice));
@@ -118,9 +119,10 @@ double blur_image_cuda(string originalImagePath, bool isToImageWrite){
 
 	gpuErrchk(cudaMemcpy(host_image, device_image, 3 * originalImage.rows * originalImage.cols * sizeof(uchar), cudaMemcpyDeviceToHost));
 	gpuErrchk(cudaFree(device_image));
-	const clock_t end_time = clock();
 
-	double parallel_time = float( end_time - begin_time ) /  CLOCKS_PER_SEC;
+	gettimeofday(&end, NULL);
+    double delta = ((end.tv_sec  - start.tv_sec) * 1000000u + 
+         end.tv_usec - start.tv_usec) / 1.e6;
 
 	gpuErrchk(cudaFree(device_multiplication_matrix));
 
@@ -128,5 +130,5 @@ double blur_image_cuda(string originalImagePath, bool isToImageWrite){
 	if(isToImageWrite){
 		imwrite("output/bluredimage_cuda.png", outputImage);
 	}
-	return parallel_time;
+	return delta;
 }

@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include "omp.h"
 #include <boost/chrono.hpp>
+#include <sys/time.h>
 
 using namespace boost::chrono;
 using namespace cv;
@@ -49,6 +50,9 @@ int main(int argc, char **argv) {
 
     float factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
 
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
+
     #pragma omp parallel for
     for (int i = 0; i < original_image.cols; i++) {
         for (int j = 0; j < original_image.rows; j++) {
@@ -61,6 +65,11 @@ int main(int argc, char **argv) {
             original_image.at<Vec3b>(Point(i, j)) = Vec3b(newBlue, newGreen, newRed);
         }
     }
+
+    gettimeofday(&end, NULL);
+    float delta = ((end.tv_sec  - start.tv_sec) * 1000000u +
+                                         end.tv_usec - start.tv_usec) / 1.e6;
+    cout << delta;
 
     // imwrite("./output/contrast-omp.jpg", concatenated_image);
     return 0;
