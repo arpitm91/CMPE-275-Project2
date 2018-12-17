@@ -11,7 +11,7 @@ using namespace std;
 
 int SHARPEN_FACTOR[3][3] = {
         {-1, -1, -1},
-        {-1,  9,  -1},
+        {-1,  8,  -1},
         {-1,  -1,  -1}
 };
 
@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-    namedWindow("Display window", WINDOW_NORMAL);// Create a window for display.
+//    namedWindow("Display window", WINDOW_NORMAL);// Create a window for display.
 
     int i, j, n = original_image.cols, m = original_image.rows;
 
@@ -80,7 +80,6 @@ int main(int argc, char **argv) {
         }
     }
 
-    hconcat(original_image, sharpened_image, concatenated_image);
-    imwrite("pic.jpg", concatenated_image);                   // Show our image inside it.
+//    imwrite("pic.jpg", sharpened_image);                   // Show our image inside it.
     return 0;
 }
