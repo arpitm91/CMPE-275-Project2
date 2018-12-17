@@ -52,7 +52,10 @@ Mat contrast_cuda(Mat original_image, int contrast) {
 
     float factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
 
+    // Assign Number of threads per Block (32x32)
     dim3 dimBlock(32,32);
+
+    // Calculate Grid Size based on block Size
     dim3 dimGrid;
     dimGrid.x = ceil(float(original_image.cols) / 32);
     dimGrid.y = ceil(float(original_image.rows) / 32);    

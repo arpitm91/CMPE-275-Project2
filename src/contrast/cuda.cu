@@ -33,7 +33,6 @@ int Truncate(int value) {
 }
 
 uchar* convertImage(Mat mat) {
-    // uchar *array = new uchar[mat.rows * mat.cols];
     uchar *array;
     if (mat.isContinuous())
         array = mat.data;
@@ -75,7 +74,6 @@ int main(int argc, char **argv) {
     uchar* image = convertImage(original_image);
     uchar* device_image;
 
-    cout << "Image Resolution: " << original_image.rows << "x" << original_image.cols << endl;
     float factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
 
     dim3 dimBlock(32,32);
@@ -83,25 +81,13 @@ int main(int argc, char **argv) {
     dimGrid.x = ceil(float(original_image.cols) / 32);
     dimGrid.y = ceil(float(original_image.rows) / 32);
 
-    const clock_t begin_time = clock();
-
     gpuErrchk(cudaMalloc((void**) &device_image, 3 *  original_image.rows * original_image.cols *sizeof(uchar))); 
     gpuErrchk(cudaMemcpy(device_image, image, 3 * original_image.rows * original_image.cols *sizeof(uchar), cudaMemcpyHostToDevice));
     contrast_image<<< dimGrid, dimBlock >>>(device_image, original_image.rows, original_image.cols, factor);
     gpuErrchk(cudaMemcpy(image, device_image, 3 * original_image.rows * original_image.cols *sizeof(uchar), cudaMemcpyDeviceToHost));
     gpuErrchk(cudaFree(device_image));
-
-    cout << "Par:" << float( clock () - begin_time ) /  CLOCKS_PER_SEC << endl;
-
-    const clock_t begin_time_seq = clock();
-    for (int i = 0; i < original_image.rows; i++) {
-        for (int j = 0; j < original_image.cols * 3; j++) {
-            image[j*original_image.rows+i] = Truncate(factor * (int(image[j*original_image.rows+i]-128)+128 ));
-        }
-    }
-    cout << "Seq: "<< float( clock () - begin_time_seq ) /  CLOCKS_PER_SEC << endl;
-
     original_image.data = image;
-    imwrite("./output/contrast_cuda.jpg", original_image);
+
+    // imwrite("./output/contrast_cuda.jpg", original_image);
     return 0;
 }

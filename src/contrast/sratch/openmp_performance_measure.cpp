@@ -13,6 +13,7 @@
 #include <libgen.h>
 #include <math.h>
 
+#include "omp.h"
 #include "./utils/utils.h"
 #include "./utils/openmp_contrast_ops.h"
 #include "./utils/seq_contrast_ops.h"
@@ -61,10 +62,10 @@ int main(int argc, char **argv) {
         cout << "Seq   : "<< float( end_time_seq - begin_time_seq ) /  CLOCKS_PER_SEC << endl;
         
         string output_filename = "./output/contrast_seq_" + input_filename;
-        imwrite(output_filename, contrast_image_seq);
+        //imwrite(output_filename, contrast_image_seq);
 
         output_filename = "./output/contrast_openmp_" + input_filename;
-        imwrite(output_filename, contrast_image_openmp);
+        //imwrite(output_filename, contrast_image_openmp);
     }
 
     cout << "Total Sequenctial Time: " << sequence_time << endl;
