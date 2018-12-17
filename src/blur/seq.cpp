@@ -1,99 +1,95 @@
 //
-// Created by Aartee Kasliwal on 2018-12-09.
+// Created by Arpit Mathur on 2018-12-09.
 //
 
-#include <cstdio>
-#include <iostream>
-#include <string>
-#include <cv.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
+#include <iostream>
 #include <sys/time.h>
-#include "omp.h"
+#include <vector>
 
 using namespace cv;
 using namespace std;
 
-const int GAUSSIAN_RADIUS = 20;
+int RADIUS = 3;
 
-int Truncate(int value) {
-    if (value > 255)
-        return 255;
-    if (value < 0)
-        return 0;
-    return value;
+void my_blur(Mat &original_image, int &i, int &j, int &newBlue, int &newGreen, int &newRed, int& r,int&m,int&n) {
+    newBlue = 0;
+    newGreen = 0;
+    newRed = 0;
+    int sum = 0;
+    Vec3b point_color;
+    int di, dj;
+    for (di = 0; di <= 2*r+1; di++) {
+        if(i -r + di<0||i -r + di>=n)
+            continue;
+        for (dj = 0; dj <= 2*r+1; dj++) {
+            if(j -r + dj<0||j -r + dj>=m)
+                continue;
+            point_color = original_image.at<Vec3b>(Point(i -r + di, j -r + dj));
+            newBlue +=  point_color[0];
+            newGreen += point_color[1];
+            newRed += point_color[2];
+            sum++;
+        }
+    }
+
+    newBlue /=  sum;
+    newGreen /= sum;
+    newRed /= sum;
+
+    if (newBlue < 0)
+        newBlue = 0;
+    if (newBlue > 255)
+        newBlue = 255;
+
+    if (newGreen < 0)
+        newGreen = 0;
+    if (newGreen > 255)
+        newGreen = 255;
+
+    if (newRed < 0)
+        newRed = 0;
+    if (newRed > 255)
+        newRed = 255;
 }
 
-
-int main(int argc, const char** argv){
-	int radius= GAUSSIAN_RADIUS;
-	if (argc < 2) {
-		printf("Usage: ./executable originalImagePath\n");
-		return -1;
-	}
-
-	Mat originalImage = imread(argv[1], CV_LOAD_IMAGE_COLOR);
-
-    //check whether the image is loaded or not
-    if (!originalImage.data) {
-        printf("Error : No Image Data.\n");
+int main(int argc, char **argv) {
+    if (argc != 2) {
+        cout << " Usage: display_image ImageToLoadAndDisplay" << endl;
         return -1;
     }
 
+    Mat original_image, concatenated_image;
+    original_image = imread(argv[1], CV_LOAD_IMAGE_COLOR);   // Read the file
+
+    if (!original_image.data)                              // Check for invalid input
+    {
+        cout << "Could not open or find the image" << std::endl;
+        return -1;
+    }
+
+//    namedWindow("Display window", WINDOW_NORMAL);// Create a window for display.
     struct timeval start, end;
     gettimeofday(&start, NULL);
 
-    int size = (2 * GAUSSIAN_RADIUS + 1) * (2 * GAUSSIAN_RADIUS + 1);
-    int multiplication_matrix[size];
+    int i, j, n = original_image.cols, m = original_image.rows;
 
-    for(int i = 0; i < size; i++){
-        multiplication_matrix[i] = 1;
-    }
+    Mat blured_image(m, n, CV_8UC3, Scalar(255, 255, 255));
+    for (i = 0; i < n; i++) {
+        int newBlue, newGreen, newRed;
+        for (j = 0; j < m; j++) {
+            my_blur(original_image, i, j, newBlue, newGreen, newRed,RADIUS,m,n);
+            blured_image.at<Vec3b>(Point(i, j)) = Vec3b(static_cast<uchar>(newBlue), static_cast<uchar>(newGreen),
+                                                           static_cast<uchar>(newRed));
 
-    Mat blurred_image = originalImage.clone();
-    int h = originalImage.rows;
-    int w = originalImage.cols;
-
-    for(int i = 0; i < w; i++) {
-        if(i + 2 *  radius > w - 1) {
-            continue;
-        }
-        for (int j = 0; j < h; j++) {
-            if(j + 2 * radius > h - 1) {
-                continue;
-            }
-
-            double red = 0;
-            double green = 0;
-            double blue = 0;
-            double sum = 0;
-
-            for(int iy = 0; iy < 2 * radius + 1; iy++) {
-                if(j + iy + radius > h - 1) {
-                    continue;
-                }
-
-                for (int ix = 0; ix < 2 * radius + 1; ix++) {
-                    if(i + ix + radius > w - 1) {
-                        continue;
-                    }
-
-                    Vec3b channels = originalImage.at<Vec3b>(Point(i + ix + radius, j + iy + radius));
-
-                    blue += double(channels[0]) * multiplication_matrix[ix * radius + iy];
-                    green += double(channels[1]) * multiplication_matrix[ix * radius + iy];
-                    red += double(channels[2]) * multiplication_matrix[ix * radius + iy];
-                    sum += multiplication_matrix[ix * radius + iy];
-                }
-            }
-            blurred_image.at<Vec3b>(Point(i + 2 * radius, j + 2 * radius)) = Vec3b(Truncate(blue/sum), Truncate(green/sum), Truncate(red/sum));
         }
     }
-    
     gettimeofday(&end, NULL);
-    double delta = ((end.tv_sec  - start.tv_sec) * 1000000u + 
-         end.tv_usec - start.tv_usec) / 1.e6;
-	cout<<delta;
-	return 0;
+
+    float delta = ((end.tv_sec  - start.tv_sec) * 1000000u +
+             end.tv_usec - start.tv_usec) / 1.e6;
+    cout<<delta;
+//    imwrite("pic.jpg", blured_image);                   // Show our image inside it.
+    return 0;
 }
